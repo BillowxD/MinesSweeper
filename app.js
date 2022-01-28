@@ -279,8 +279,7 @@ function getCellsAroundCell(cell) {
     var myPos = (cell.index+1) / gGame.gameLevel.SIZE;
     myPos = myPos - Math.floor(myPos);
     if (myPos == 0) myPos = 1;
-    myPos = (myPos * gGame.gameLevel.SIZE);
-
+    myPos = Math.floor(myPos * gGame.gameLevel.SIZE);
     var cells = [];
     if (cell.index - gGame.gameLevel.SIZE >= 0) // TOP
         cells.push(gBoard[cell.index - gGame.gameLevel.SIZE]);
