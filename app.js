@@ -3,16 +3,23 @@ const ASSETS = {
     FLAGGED: "images/flagged.png",
     BOMB:    "images/bomb.png"
 };
-
+/*
+    Defining useful constants
+    LEFT_CLICK - used to detect click of the left mouse click
+    RIGHT_CLICK - used to detect click of the right mouse click
+    GAME_WIDTH - used to set fixed size for our game table
+*/
 const LEFT_CLICK = 0,
       RIGHT_CLICK = 2,
       GAME_WIDTH = 500;
 
+/*
+    gBoard - is an array that stores all our game cells inside of it
+*/
 var gBoard = [];
 
 /*
-    -- INFO
-        an object that holds all the gLevels objects in it.
+    gLevels - an object that holds all the gLevels objects in it.
 */
 var gLevels = [
     { // Easy gLevel
@@ -39,6 +46,7 @@ var gLevels = [
         gGame is the main object of the game.
         It includes all the information of our game.
     -- PARAMS
+        @ gameLevel - hold the gameLevel we chose from the gLevels array
         @ isOn - indicates if the game has started
         @ shownCount - how many cells are opened
         @ MarkedCount - how many cells are marked with flags
@@ -53,17 +61,18 @@ var gGame = {
 };
 
 /*
-    VAR gameLevel is used to access gameLevel on DOM
-    VAR gameBoard is used to access gameBoard on DOM
+    gameTable - used to access gameTable on DOM
+    gameLevels - used to access gameLevels on DOM
+    gameOptions - used to access gameOptions on DOM
+    gameBoard - used to access gameBoard on DOM
 */
 var gameTable, gameLevels, gameOptions, gameBoard;
 
 /*
-    initGame()
     -- INFO
         initGame is called whenever the page is loaded.
         1. It will define our gameLevels and gameBoard variables
-        and give us access to them for later use.
+            and give us access to them for later use.
         2. It calls a function that renders our Levels buttons in the game
 */
 
@@ -76,12 +85,24 @@ function initGame() {
     renderGameTable();
 }
 
+/*
+    renderGameTable
+    --INFO
+        Generates the game levels
+        Generates the gameOptions (Flags count, reset button, timer)
+        Adding style to our gameBoard
+*/
 function renderGameTable() {
     renderLevels();
     renderGameOptions();
     performStyle();
 }
 
+/*
+    performStyle()
+    -- INFO
+        Performing style to our gameBoard
+*/
 function performStyle() {
     gameTable.style.width = GAME_WIDTH+"px";
     gameTable.style.fontFamily = "arial";
@@ -120,6 +141,11 @@ function renderLevels() {
     gameLevels.appendChild(td);
 }
 
+/*
+    renderGameOptions
+    -- INFO
+        Adding to our game board the game options which are flags count, reset button, timer
+*/
 function renderGameOptions() {
     var td;
     td = document.createElement("td");
@@ -168,6 +194,17 @@ function initGameDefaults(gameLevel) {
     document.getElementById("flags").innerHTML = gGame.gameLevel.MINES - gGame.markedCount + `<img src="${ASSETS.FLAGGED}" width="20px" height="20" />`;
 }
 
+/*
+    startGame()
+    -- PARAMS
+        @gameLevel - indicates our game information, amount of mines and board size
+    -- INFO
+        Inits a new game,
+        generates game board,
+        sperading the mines on the board
+        calls renderGame()
+*/
+
 function startGame(gameLevel) {
     if (gameLevel == null || typeof gameLevel === typeof undefined) return;
     setResetHidden(true);
@@ -189,6 +226,11 @@ function startGame(gameLevel) {
     renderGame();
 }
 
+/*
+    renderGame()
+    -- INFO
+        rendering our game board to the DOM
+*/
 function renderGame() {
     gameBoard.innerHTML = "";
     var gameBoardTD, table, tr, td;
@@ -211,6 +253,13 @@ function renderGame() {
     gameBoard.appendChild(gameBoardTD);
 }
 
+/*
+    calculateMinesAround
+    -- PARAMS
+        @cell - gBoard cell
+    -- INFO
+        calculate the mines around the speicifc given cell
+*/
 function calculateMinesAround(cell) {
     var mines = 0;
     for (var nearCell of getCellsAroundCell(cell)) {
@@ -219,27 +268,33 @@ function calculateMinesAround(cell) {
     return mines;
 }
 
+/*
+    getCellsAroundCell
+    -- PARAMS
+        @cell - gBoard cell
+    -- INFO
+        getting all the cells around the specific given cell
+*/
 function getCellsAroundCell(cell) {
     var myPos = (cell.index+1) / gGame.gameLevel.SIZE;
     myPos = myPos - Math.floor(myPos);
     if (myPos == 0) myPos = 1;
-    myPos = (myPos * gGame.gameLevel.SIZE) - 1;
-    mines = 0;
+    myPos = (myPos * gGame.gameLevel.SIZE);
 
     var cells = [];
     if (cell.index - gGame.gameLevel.SIZE >= 0) // TOP
         cells.push(gBoard[cell.index - gGame.gameLevel.SIZE]);
-    if (myPos > 0 && cell.index - (gGame.gameLevel.SIZE+1) >= 0) // TOP LEFT
+    if (myPos > 1 && cell.index - (gGame.gameLevel.SIZE+1) >= 0) // TOP LEFT
         cells.push(gBoard[cell.index - (gGame.gameLevel.SIZE+1)]);
     if (myPos < gGame.gameLevel.SIZE && cell.index - (gGame.gameLevel.SIZE-1) >= 0) // TOP RIGHT
         cells.push(gBoard[cell.index - (gGame.gameLevel.SIZE-1)]);
-    if (myPos > 0) // LEFT
+    if (myPos > 1) // LEFT
         cells.push(gBoard[cell.index-1]);
     if (myPos < gGame.gameLevel.SIZE && cell.index+1 < gBoard.length) // RIGHT
         cells.push(gBoard[cell.index+1]);
     if (cell.index + gGame.gameLevel.SIZE < gBoard.length) // BOTTOM
         cells.push(gBoard[cell.index + gGame.gameLevel.SIZE]);
-    if (myPos > 0 && cell.index + (gGame.gameLevel.SIZE-1) < gBoard.length) // BOTTOM LEFT
+    if (myPos > 1 && cell.index + (gGame.gameLevel.SIZE-1) < gBoard.length) // BOTTOM LEFT
         cells.push(gBoard[cell.index + (gGame.gameLevel.SIZE-1)]);
     if (myPos < gGame.gameLevel.SIZE && cell.index + (gGame.gameLevel.SIZE+1) < gBoard.length) // BOTTOM RIGHT
         cells.push(gBoard[cell.index + (gGame.gameLevel.SIZE+1)]);
@@ -247,6 +302,13 @@ function getCellsAroundCell(cell) {
     return cells;
 }
 
+/*
+    createCell()
+    -- PARAMS
+        @cell - gBoard cell
+    -- INFO
+        Creating the cell on the gameBoard DOM
+*/
 function createCell(cell) {
     var tile = document.createElement("img");
         tile.setAttribute("width", "100%");
@@ -262,6 +324,14 @@ function createCell(cell) {
     return tile;
 }
 
+/*
+    flagTile()
+    -- PARAMS
+        @cell - gBoard cell
+    -- INFO
+        Flagging the cell on DOM
+        Updating the model that a new cell is now flagged
+*/
 function flagTile(cell) {
     if (!cell.isMarked && gGame.markedCount == gGame.gameLevel.MINES) return;
     if (cell.isMarked) cell.tile.src = ASSETS.DEFAULT;
@@ -272,6 +342,16 @@ function flagTile(cell) {
     document.getElementById("flags").innerHTML = gGame.gameLevel.MINES - gGame.markedCount + `<img src="${ASSETS.FLAGGED}" width="20px" height="20" />`;
 }
 
+/*
+    openTile
+    -- PARAMS
+        @cell - gBoard cell
+    -- RECURSIVE
+    -- INFO
+        Opening the cell tile
+        if it's mine it will end the game.
+        if it have 0 mines around it will open the around cells aswell
+*/
 function openTile(cell) {
     if (cell.isMarked || cell.isShown) return;
     cell.isShown = true;
@@ -285,6 +365,13 @@ function openTile(cell) {
     }
 }
 
+/*
+    endGame
+    -- PARAMS
+        @win - boolean param that indicates if the player have won
+    -- INFO
+        this method is used inorder to end the game.
+*/
 function endGame(win = false) {
     gGame.isOn = false;
     clearInterval(gGame.timer);
@@ -300,10 +387,22 @@ function endGame(win = false) {
     setResetHidden(false);
 }
 
+/*
+    toggleReset
+    -- INFO
+        this method is toggeling wheter the reset buttons is shown or not
+*/
 function toggleReset() {
     document.getElementById("reset").style.display == "block" ? document.getElementById("reset").style.display = "none" : document.getElementById("reset").style.display = "block";
 }
 
+/*
+    setResetHidden
+    -- PARAMS
+        @hidden - boolean that indicates the display state of the reset button, true = hidden, false = block
+    -- INFO
+        this method is used to update the DOM wheter to show the reset button or not
+*/
 function setResetHidden(hidden) {
     if (hidden) document.getElementById("reset").style.display = "none";
     else document.getElementById("reset").style.display = "block";
