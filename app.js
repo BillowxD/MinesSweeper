@@ -275,32 +275,24 @@ function calculateMinesAround(cell) {
     -- INFO
         getting all the cells around the specific given cell
 */
+
 function getCellsAroundCell(cell) {
     var myPos = (cell.index+1) / gGame.gameLevel.SIZE;
     myPos = myPos - Math.floor(myPos);
     if (myPos == 0) myPos = 1;
-    myPos = Math.floor(myPos * gGame.gameLevel.SIZE);
+    myPos = Math.floor(myPos * gGame.gameLevel.SIZE)-1;
     var cells = [];
-    if (cell.index - gGame.gameLevel.SIZE >= 0) // TOP
-        cells.push(gBoard[cell.index - gGame.gameLevel.SIZE]);
-    if (myPos > 1 && cell.index - (gGame.gameLevel.SIZE+1) >= 0) // TOP LEFT
-        cells.push(gBoard[cell.index - (gGame.gameLevel.SIZE+1)]);
-    if (myPos < gGame.gameLevel.SIZE && cell.index - (gGame.gameLevel.SIZE-1) >= 0) // TOP RIGHT
-        cells.push(gBoard[cell.index - (gGame.gameLevel.SIZE-1)]);
-    if (myPos > 1) // LEFT
-        cells.push(gBoard[cell.index-1]);
-    if (myPos < gGame.gameLevel.SIZE && cell.index+1 < gBoard.length) // RIGHT
-        cells.push(gBoard[cell.index+1]);
-    if (cell.index + gGame.gameLevel.SIZE < gBoard.length) // BOTTOM
-        cells.push(gBoard[cell.index + gGame.gameLevel.SIZE]);
-    if (myPos > 1 && cell.index + (gGame.gameLevel.SIZE-1) < gBoard.length) // BOTTOM LEFT
-        cells.push(gBoard[cell.index + (gGame.gameLevel.SIZE-1)]);
-    if (myPos < gGame.gameLevel.SIZE && cell.index + (gGame.gameLevel.SIZE+1) < gBoard.length) // BOTTOM RIGHT
-        cells.push(gBoard[cell.index + (gGame.gameLevel.SIZE+1)]);
-
+    for (var xAxis = -1; xAxis < 2; xAxis++) {
+        for (var yAxis = cell.index-gGame.gameLevel.SIZE; yAxis < cell.index+gGame.gameLevel.SIZE;) {
+            yAxis += gGame.gameLevel.SIZE;
+            nearIndex = xAxis+yAxis;
+            if (myPos+xAxis < 0 || myPos+xAxis >= gGame.gameLevel.SIZE || nearIndex < 0 || nearIndex >= gBoard.length) continue;
+            if (nearIndex == cell.index) continue;
+            cells.push(gBoard[nearIndex]);
+        }
+    }
     return cells;
 }
-
 /*
     createCell()
     -- PARAMS
@@ -381,7 +373,6 @@ function endGame(win = false) {
                 cell.tile.src = ASSETS.BOMB;
             }
         }
-        alert("You lost..");
     }
     setResetHidden(false);
 }
